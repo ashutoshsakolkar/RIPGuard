@@ -8,7 +8,8 @@ You can change network conditions, simulate link failures, compare routes, and s
 
 ## 🚀 Live Dashboard
 
-**Live demo:** Coming soon. The dashboard needs to be deployed before a public link can be shared.
+**Live demo:** 
+  URL https://ripguard-2.onrender.com
 
 Once the application is hosted, its public URL will be added here so anyone can explore the dashboard directly from a browser.
 
