@@ -1,105 +1,219 @@
-RIPGuard — Reliability-Aware Routing Dashboard
+# RIPGuard — Reliability-Aware Routing Dashboard
 
-RIPGuard is an interactive Python web dashboard that demonstrates and compares shortest-hop routing with a custom reliability-aware weighted-routing strategy in a six-router network.
+RIPGuard is a networking project built around a simple question: **What if the route with the fewest hops isn't always the best route?**
 
-🔗 Live Dashboard
+This project explores that idea through an interactive dashboard representing a six-router network. It compares a standard RIP-style shortest-hop routing approach with RIPGuard, a custom routing strategy that also considers latency, packet loss, and link utilization.
 
+You can change network conditions, simulate link failures, compare routes, and see how the routing decisions change.
 
-https://YOUR-RIPGUARD-SERVICE.onrender.com
+## 🚀 Live Dashboard
 
-The GitHub repository contains the source code. The dashboard itself becomes publicly accessible only after the Python web app is deployed to a hosting service.
+**Live demo:** Coming soon. The dashboard needs to be deployed before a public link can be shared.
 
-Repository
+Once the application is hosted, its public URL will be added here so anyone can explore the dashboard directly from a browser.
 
-GitHub: https://github.com/ashutoshsakolkar/RIPGuard
+**GitHub Repository:** [RIPGuard on GitHub](https://github.com/ashutoshsakolkar/RIPGuard)
 
-Main application: dashboard.py
+## What Can You Do With RIPGuard?
 
-Features
+The dashboard lets you experiment with different network conditions instead of looking at routing tables alone.
 
-Interactive six-router topology with ten links.
+* **Explore the network:** View six routers connected through ten inter-router links.
+* **Monitor link conditions:** View latency, packet loss, utilization, and calculated link costs.
+* **Generate network conditions:** Change the simulated metrics and see how route selection responds.
+* **Compare routing methods:** Compare the route chosen by the shortest-hop baseline with RIPGuard's weighted-cost route.
+* **Simulate link failures:** Fail a connection, observe the route change, and restore the connection.
+* **Demonstrate packet-loss penalties:** Trigger a controlled scenario where packet loss exceeds the configured 10% threshold.
+* **Understand the calculations:** Inspect the formula used to calculate individual link costs.
+* **Follow network events:** Use the event log and route summary to understand what changes when network conditions change.
 
-Dynamic per-link latency, packet-loss, and utilization metrics.
+## Understanding the Routing Approach
 
-Calculated weighted link costs, shown in the topology and link table.
+### 1. Standard RIP-Style Routing
 
-Side-by-side comparison of a shortest-hop RIP-style baseline and RIPGuard's weighted route selection.
+The dashboard includes a baseline that selects a route using the fewest-hop principle associated with RIP.
 
-Link failure and restoration controls with automatic route recalculation.
+For example, if one route reaches a destination in two hops and another takes three hops, the shortest-hop baseline prefers the two-hop route.
 
-Controlled demonstration of high packet loss and threshold-based cost penalties.
+This approach provides a useful reference point for our comparison.
 
-Expandable link-cost calculations, event log, and route summary.
+### 2. RIPGuard: Reliability-Aware Weighted Routing
 
-RIPGuard cost model
+RIPGuard considers more than the number of hops.
 
-The project uses the following custom weighted cost:
+It calculates a cost for each active link based on its network conditions. The routing algorithm then searches for the available route with the lowest total weighted cost.
 
+The cost model considers:
+
+| Parameter          | Meaning                                         |
+| ------------------ | ----------------------------------------------- |
+| Latency (`L`)      | Link delay, measured in milliseconds            |
+| Packet loss (`P`)  | Percentage of packets lost on a link            |
+| Utilization (`U`)  | Percentage of the link's capacity being used    |
+| SLA penalty        | An additional cost when packet loss exceeds 10% |
+| Congestion penalty | An additional cost when utilization exceeds 80% |
+
+### RIPGuard Cost Formula
+
+The current model uses this formula:
+
+```text
 C = 1 + 0.4L + 5P + 0.05U + S(P) + G(U)
 
-S(P) = 0                         when P <= 10
-       60 + 6(P - 10)            when P > 10
+Packet-loss penalty:
 
-G(U) = 0                         when U <= 80
-       0.15(U - 80)^2            when U > 80
+S(P) = 0                    when P <= 10
+       60 + 6(P - 10)       when P > 10
 
-Where:
+Congestion penalty:
 
-L = latency in milliseconds.
+G(U) = 0                    when U <= 80
+       0.15(U - 80)^2       when U > 80
+```
 
-P = packet loss in percentage points; for example, 12 means 12%.
+Here, `P = 12` represents 12% packet loss, and `U = 85` represents 85% link utilization.
 
-U = link utilization in percentage points.
+The additional penalties make links that exceed the configured thresholds less attractive. This allows RIPGuard to choose a different route when an alternative has a lower total weighted cost.
 
-S(P) = additional packet-loss penalty.
+**Note:** The thresholds and coefficients are design choices for this project. They are not universal networking standards.
 
-G(U) = additional congestion penalty.
+### Why Use an SLA Penalty?
 
-The 10% packet-loss threshold, 80% utilization threshold, and penalty coefficients are project-specific simulation choices, not universal networking standards.
+A link can remain operational while still providing poor service because of packet loss or congestion.
 
-Run locally
+Without an additional penalty, a link that slightly exceeds the acceptable packet-loss threshold may not receive a sufficiently high cost to influence route selection.
 
-Requirements: Python 3.10 or later recommended. The application uses Python's standard library and does not require third-party packages.
+RIPGuard therefore applies an extra penalty when packet loss exceeds 10%. It also applies a nonlinear congestion penalty when utilization exceeds 80%.
 
-Clone the repository:
+The objective is to make the routing decision more sensitive to links that violate the project's configured quality thresholds.
 
+## RIP vs RIPGuard: What Are We Comparing?
+
+The dashboard compares the routes selected by the two approaches under the same simulated network conditions.
+
+The comparison includes:
+
+* Selected route
+* Total number of hops
+* Individual link costs
+* Total weighted path cost
+* Weighted-cost reduction
+* Route changes following network-condition updates
+
+To calculate weighted-cost reduction fairly, the dashboard evaluates the route selected by the shortest-hop baseline using the same RIPGuard cost formula used to evaluate the RIPGuard route.
+
+This means the percentage represents a reduction in the **simulated weighted-cost metric**. It does not automatically represent the same percentage improvement in actual throughput, latency, or packet delivery.
+
+## Network Topology
+
+The dashboard models six routers representing the following locations:
+
+| Router | Location    |
+| ------ | ----------- |
+| R1     | Head Office |
+| R2     | Chennai     |
+| R3     | Bangalore   |
+| R4     | Hyderabad   |
+| R5     | Mumbai      |
+| R6     | Delhi       |
+
+The network contains ten inter-router links. A route may use a direct connection or travel through multiple routers to reach its destination.
+
+When a link fails, it is excluded from route calculation. The dashboard then recalculates the available route.
+
+## Getting Started
+
+You can run RIPGuard locally on your computer.
+
+### Requirements
+
+* Python 3.10 or later is recommended.
+* No third-party Python packages are required.
+* A modern web browser.
+
+### Installation and Setup
+
+**Step 1: Clone the repository**
+
+```bash
 git clone https://github.com/ashutoshsakolkar/RIPGuard.git
+```
+
+**Step 2: Open the project folder**
+
+```bash
 cd RIPGuard
+```
 
-Run the dashboard:
+**Step 3: Start the dashboard**
 
+```bash
 python dashboard.py
+```
 
-Open http://127.0.0.1:8770/ in a browser.
+**Step 4: Open the dashboard**
 
-Press Ctrl+C in the terminal to stop the server.
+Visit the following address in your browser:
 
-Deploy publicly on Render
+```text
+http://127.0.0.1:8770/
+```
 
-Push dashboard.py, README.md, requirements.txt, and .gitignore to the main branch of this GitHub repository.
+The dashboard should load locally.
 
-Sign in to Render and choose New → Web Service.
+To stop the server, return to the terminal and press `Ctrl+C`.
 
-Connect the GitHub repository ashutoshsakolkar/RIPGuard.
+## Deploying the Dashboard
 
-Use these settings:
+Uploading the source code to GitHub makes the project available for others to inspect and download. However, GitHub does not automatically run this Python application as a live website.
 
-Runtime: Python 3
+To provide a public dashboard link, the application must be deployed to a hosting service.
 
-Build command: pip install -r requirements.txt
+For a Render web service, use these settings:
 
-Start command: python dashboard.py
+| Setting       | Value                             |
+| ------------- | --------------------------------- |
+| Repository    | `ashutoshsakolkar/RIPGuard`       |
+| Branch        | `main`                            |
+| Runtime       | Python                            |
+| Build command | `pip install -r requirements.txt` |
+| Start command | `python dashboard.py`             |
 
-Branch: main
+After deployment, test the URL provided by the hosting service. Once the dashboard loads successfully, replace the live-demo notice at the top of this README with the verified public URL.
 
-Create the service and wait for the deployment to complete.
+## Project Structure
 
-Open the Render-generated https://...onrender.com URL and confirm the dashboard loads.
+```text
+RIPGuard/
+├── dashboard.py
+├── README.md
+├── requirements.txt
+└── .gitignore
+```
 
-Replace the pending URL near the top of this README with that real public URL, then commit and push the README update.
+* `dashboard.py` contains the Python web server, dashboard interface, routing calculations, and interactive controls.
+* `README.md` explains the project and how to run it.
+* `requirements.txt` documents the dependency setup.
+* `.gitignore` lists files that should not be committed to GitHub.
 
-The application reads the PORT environment variable and binds to 0.0.0.0, as expected by Render web services.
+## Scope and Limitations
 
-Important scope note
+RIPGuard is currently a routing simulation rather than a live implementation of the RIP protocol.
 
-RIPGuard is a routing simulation. The baseline models shortest-hop route selection; it does not run the actual RIP protocol between physical or emulated routers or exchange RIP routing updates. RIPGuard's weighted score is a custom metric, whereas standard RIP's native routing metric is hop count. Dashboard and benchmark figures are simulation outputs, not measurements from a production network.
+The baseline models shortest-hop route selection. It does not exchange actual RIP routing updates between physical or emulated routers.
+
+The latency, packet-loss, and utilization values are simulated. Therefore, dashboard results demonstrate the behaviour of the routing model under the selected conditions; they are not measurements from a production network.
+
+A more complete evaluation could use a network emulator or real routing implementation to measure convergence time, packet delivery, end-to-end delay, and behaviour during link failures.
+
+These additional tests would help establish how the approach performs beyond the current simulation.
+
+## Why This Project?
+
+I wanted to make routing decisions easier to understand and demonstrate visually.
+
+Instead of simply displaying a routing table, RIPGuard allows users to change network conditions, observe the effect on link costs, and understand why an alternative route might become preferable.
+
+The central idea behind the project is straightforward:
+
+**The route with the fewest hops is not necessarily the route with the lowest weighted cost. By considering link conditions, a routing strategy can make different decisions when reliability and congestion matter.**
