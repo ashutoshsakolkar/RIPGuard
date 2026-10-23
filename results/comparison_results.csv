@@ -1,0 +1,19 @@
+scenario,source,destination,model,path,hop_count,path_cost
+normal,R1,R6,Standard RIP baseline,R1 -> R4 -> R5 -> R6,3,
+normal,R1,R6,RIPGuard,R1 -> R4 -> R5 -> R6,3,11.7
+normal,R2,R6,Standard RIP baseline,R2 -> R5 -> R6,2,
+normal,R2,R6,RIPGuard,R2 -> R3 -> R6,2,10.7
+normal,R1,R3,Standard RIP baseline,R1 -> R4 -> R3,2,
+normal,R1,R3,RIPGuard,R1 -> R2 -> R3,2,8.4
+link_failure,R1,R6,Standard RIP baseline,R1 -> R2 -> R5 -> R6,3,
+link_failure,R1,R6,RIPGuard,R1 -> R2 -> R3 -> R6,3,14.7
+link_failure,R2,R6,Standard RIP baseline,R2 -> R5 -> R6,2,
+link_failure,R2,R6,RIPGuard,R2 -> R3 -> R6,2,10.7
+link_failure,R1,R3,Standard RIP baseline,R1 -> R2 -> R3,2,
+link_failure,R1,R3,RIPGuard,R1 -> R2 -> R3,2,8.4
+congestion,R1,R6,Standard RIP baseline,R1 -> R4 -> R5 -> R6,3,
+congestion,R1,R6,RIPGuard,R1 -> R4 -> R5 -> R6,3,11.7
+congestion,R2,R6,Standard RIP baseline,R2 -> R5 -> R6,2,
+congestion,R2,R6,RIPGuard,R2 -> R5 -> R6,2,12.2
+congestion,R1,R3,Standard RIP baseline,R1 -> R4 -> R3,2,
+congestion,R1,R3,RIPGuard,R1 -> R4 -> R3,2,10.5
