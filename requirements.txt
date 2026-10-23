@@ -1,0 +1,21 @@
+
+Flask
+streamlit
+networkx
+pandas
+numpy
+matplotlib
+plotly
+pytest
+
+What each package is for:
+
+Package	Purpose
+Flask	Web application/backend functionality, if used
+streamlit	Dashboard interface, if used
+networkx	Network topology and path calculations
+pandas	Processing experiment results
+numpy	Numerical calculations
+matplotlib	Generating graphs
+plotly	Interactive charts, if used
+pytest	Running project tests
